@@ -1,2 +1,11 @@
-# ignore Python virtual environments
+# don’t check in the virtualenv
+.venv/
 venv/
+
+# Qt auto-saves
+*.autosave
+
+# don’t check in macOS Finder cruft
+.DS_Store
+manual.PDF
+
