@@ -9,12 +9,20 @@ from pymodbus.client.tcp import ModbusTcpClient
 import os
 import PySide6
 
-# On macOS the PySide6 wheel puts the "cocoa" plugin here:
-plugin_dir = os.path.join(
-    os.path.dirname(PySide6.__file__),
-    "plugins", "platforms"
-)
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_dir
+# Qt relies on a platform plugin (``cocoa`` on macOS). Depending on the
+# PySide6 version the plugin may live in ``Qt/plugins`` or ``Qt6/plugins``.
+# Try both locations and set ``QT_QPA_PLATFORM_PLUGIN_PATH`` if a valid
+# directory is found. This helps avoid "could not find the Qt platform plugin"
+# errors when launching the GUI.
+plugin_env = "QT_QPA_PLATFORM_PLUGIN_PATH"
+plugin_roots = [
+    os.path.join(os.path.dirname(PySide6.__file__), "Qt", "plugins", "platforms"),
+    os.path.join(os.path.dirname(PySide6.__file__), "Qt6", "plugins", "platforms"),
+]
+for path in plugin_roots:
+    if os.path.isdir(path):
+        os.environ.setdefault(plugin_env, path)
+        break
 
 REG_ACTPOS = 18  # two registers holding the motor position as float
 
