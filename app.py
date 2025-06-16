@@ -3,53 +3,47 @@ import sys
 import struct
 
 from PySide6 import QtWidgets, QtUiTools, QtCore
-from PySide6.QtCore import Qt
 from pymodbus.client.tcp import ModbusTcpClient
 
-import os
-import PySide6
+REG_ACTPOS = 18  # two registers → one float
 
-# On macOS the PySide6 wheel puts the "cocoa" plugin here:
-plugin_dir = os.path.join(
-    os.path.dirname(PySide6.__file__),
-    "plugins", "platforms"
-)
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_dir
-
-REG_ACTPOS = 18  # two registers holding the motor position as float
-
-def load_ui(ui_file: str) -> QtWidgets.QWidget:
+def load_ui(ui_path: str) -> QtWidgets.QWidget:
     loader = QtUiTools.QUiLoader()
-    ui_file = QtCore.QFile(ui_file)
-    ui_file.open(QtCore.QFile.ReadOnly)
-    window = loader.load(ui_file)
-    ui_file.close()
-    return window
+    f = QtCore.QFile(ui_path)
+    if not f.open(QtCore.QFile.ReadOnly):
+        raise FileNotFoundError(f"Cannot open UI file {ui_path!r}")
+    widget = loader.load(f)
+    f.close()
+    if widget is None:
+        raise RuntimeError(f"UI loader returned None for {ui_path!r}")
+    return widget
 
 def main() -> int:
     app = QtWidgets.QApplication(sys.argv)
-
-    main_win = load_ui("ui/main_window.ui")
+    window = load_ui("ui/main_window.ui")
 
     client = ModbusTcpClient("127.0.0.1", port=5020)
-    client.connect()
+    if not client.connect():
+        QtWidgets.QMessageBox.critical(
+            None, "Connection Error",
+            "Could not connect to Modbus emulator at 127.0.0.1:5020"
+        )
+        return 1
 
-    position_label = QtWidgets.QLabel("Position: --")
-    main_win.statusbar.addPermanentWidget(position_label)
+    label = QtWidgets.QLabel("Position: --")
+    window.statusbar.addPermanentWidget(label)
 
-    def poll() -> None:
+    def poll():
         rr = client.read_holding_registers(REG_ACTPOS, count=2, slave=1)
-        if rr.isError():
-            return
-        raw = struct.pack(">HH", rr.registers[0], rr.registers[1])
-        pos = struct.unpack(">f", raw)[0]
-        position_label.setText(f"Position: {pos:.2f}")
+        if not rr.isError():
+            raw = struct.pack(">HH", rr.registers[0], rr.registers[1])
+            pos = struct.unpack(">f", raw)[0]
+            label.setText(f"Position: {pos:.2f}")
 
-    timer = QtCore.QTimer()
-    timer.timeout.connect(poll)
-    timer.start(1000)
+    timer = QtCore.QTimer(interval=1000, timeout=poll)
+    timer.start()
 
-    main_win.show()
+    window.show()
     ret = app.exec()
     client.close()
     return ret
