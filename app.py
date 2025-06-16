@@ -13,5 +13,5 @@ def load_ui(ui_file):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     main_win = load_ui("ui/main_window.ui")
-    main_win.show()
+    main_win.show() 
     sys.exit(app.exec())
