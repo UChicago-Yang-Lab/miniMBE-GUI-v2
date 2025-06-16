@@ -14,17 +14,40 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QTableWidget" name="positionTable">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>390</y>
-      <width>171</width>
-      <height>91</height>
+      <x>30</x>
+      <y>20</y>
+      <width>256</width>
+      <height>331</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="refreshButton">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>20</y>
+      <width>121</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>press me!</string>
+     <string>Refresh</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="writeButton">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>80</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Write</string>
     </property>
    </widget>
   </widget>
