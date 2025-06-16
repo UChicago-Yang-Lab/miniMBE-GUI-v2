@@ -1,3 +1,2 @@
 PySide6>=6.5
-PySide6-Tools
 pymodbus>=3.9.2
