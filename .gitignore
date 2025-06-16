@@ -7,3 +7,5 @@ venv/
 
 # don’t check in macOS Finder cruft
 .DS_Store
+manual.PDF
+
