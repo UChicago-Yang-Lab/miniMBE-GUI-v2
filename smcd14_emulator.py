@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-"""SMCD14 Modbus TCP emulator.
-
-This module exposes a tiny Modbus TCP server that mimics a subset of the
-registers of the SMCD14 stepper motor controller. Only holding registers are
-implemented as most client interactions rely on them. The emulator is useful
-for testing software without the actual hardware attached (no USB required).
-"""
-
-import argparse
-import logging
-
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 from pymodbus.device import ModbusDeviceIdentification
 from pymodbus.server import StartTcpServer
@@ -34,6 +22,8 @@ REG_BACKLASH      = 72  # 2 registers (float)
 REG_GAIN          = 74  # 2 registers (float)
 REG_OFFSET        = 76  # 2 registers (float)
 REG_MEMORY_CTRL   = 499
+REG_POS_BASE      = 200  # start address for saved positions
+NUM_POSITIONS     = 5
 
 # Default values for those registers
 DEFAULT_REG_VALUES = {
@@ -62,6 +52,8 @@ DEFAULT_REG_VALUES = {
     REG_MEMORY_CTRL:   0,
 }
 
+# initialize memory positions
+for i in range(NUM_POSITIONS):
     DEFAULT_REG_VALUES[REG_POS_BASE + 2 * i] = 0
     DEFAULT_REG_VALUES[REG_POS_BASE + 2 * i + 1] = 0
 
@@ -90,28 +82,3 @@ def build_identity() -> ModbusDeviceIdentification:
 def run_tcp(port: int) -> None:
     """Start a Modbus TCP server on the given port."""
     context = build_context()
-    identity = build_identity()
-    logging.info(f"Starting Modbus TCP emulator on port {port}")
-    # StartTcpServer handles its own serve-loop
-    StartTcpServer(
-        context,
-        identity=identity,
-        address=("0.0.0.0", port),
-    )
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="SMCD14 Modbus TCP emulator (no hardware needed)"
-    )
-    parser.add_argument(
-        "--port", type=int, default=5020,
-        help="TCP port to listen on (default: 5020)"
-    )
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    args = parse_args()
-    run_tcp(args.port)

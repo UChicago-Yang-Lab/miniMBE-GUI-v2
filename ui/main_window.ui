@@ -13,7 +13,32 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>390</y>
+      <width>171</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>press me!</string>
+    </property>
+   <widget class="QWidget" name="centralwidget">
+    <widget class="QTableWidget" name="positionTable">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>400</width>
+       <height>300</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
