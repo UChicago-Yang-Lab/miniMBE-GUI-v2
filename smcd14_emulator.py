@@ -62,6 +62,9 @@ DEFAULT_REG_VALUES = {
     REG_MEMORY_CTRL:   0,
 }
 
+    DEFAULT_REG_VALUES[REG_POS_BASE + 2 * i] = 0
+    DEFAULT_REG_VALUES[REG_POS_BASE + 2 * i + 1] = 0
+
 
 def build_context() -> ModbusServerContext:
     """Build a ModbusServerContext with default register values."""
