@@ -12,7 +12,7 @@ import logging
 
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 from pymodbus.device import ModbusDeviceIdentification
-from pymodbus.server.sync import StartTcpServer
+from pymodbus.server import StartTcpServer
 
 # ------- Register map (word addresses) ------- #
 REG_MOTOR_ON      = 14

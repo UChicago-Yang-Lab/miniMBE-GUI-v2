@@ -6,6 +6,16 @@ from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtCore import Qt
 from pymodbus.client.tcp import ModbusTcpClient
 
+import os
+import PySide6
+
+# On macOS the PySide6 wheel puts the "cocoa" plugin here:
+plugin_dir = os.path.join(
+    os.path.dirname(PySide6.__file__),
+    "plugins", "platforms"
+)
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_dir
+
 REG_ACTPOS = 18  # two registers holding the motor position as float
 
 def load_ui(ui_file: str) -> QtWidgets.QWidget:
