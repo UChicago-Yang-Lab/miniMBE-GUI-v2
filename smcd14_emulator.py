@@ -34,6 +34,8 @@ REG_BACKLASH      = 72  # 2 registers (float)
 REG_GAIN          = 74  # 2 registers (float)
 REG_OFFSET        = 76  # 2 registers (float)
 REG_MEMORY_CTRL   = 499
+REG_POS_BASE      = 200  # start address for saved positions
+NUM_POSITIONS     = 5
 
 # Default values for those registers
 DEFAULT_REG_VALUES = {
@@ -61,6 +63,11 @@ DEFAULT_REG_VALUES = {
     REG_OFFSET + 1:    0,
     REG_MEMORY_CTRL:   0,
 }
+
+# initialize memory positions
+for i in range(NUM_POSITIONS):
+    DEFAULT_REG_VALUES[REG_POS_BASE + 2 * i] = 0
+    DEFAULT_REG_VALUES[REG_POS_BASE + 2 * i + 1] = 0
 
 
 def build_context() -> ModbusServerContext:

@@ -12,4 +12,9 @@ This repository provides a minimal graphical user interface for a miniature mole
 1. Install Python.
 2. Create a virtual environment.
 3. Run `pip install -r requirements.txt`.
-4. Launch the GUI with `python app.py`.
+4. Start the Modbus emulator with `python smcd14_emulator.py`.
+5. Launch the GUI with `python app.py`.
+
+The GUI requires OpenGL libraries such as `libEGL.so.1` at runtime. If it fails
+to start due to missing system dependencies, install the necessary OpenGL
+packages for your platform.
