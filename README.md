@@ -4,10 +4,11 @@ This repository provides a minimal graphical user interface for a miniature mole
 
 ## Requirements
 
-* **Python**: tested with Python 3.11 (Python 3.10 or later is recommended)
-* **PySide6** and **PySide6-Tools**
-4. Start the Modbus emulator with `python smcd14_emulator.py`.
-5. Launch the GUI with `python app.py`.
+1. Python 3.10 or later (tested with Python 3.11)
+2. PySide6 and PySide6-Tools
+3. OpenGL libraries such as `libEGL.so.1`
+4. Start the Modbus emulator with `python smcd14_emulator.py`
+5. Launch the GUI with `python app.py`
 
 The GUI requires OpenGL libraries such as `libEGL.so.1` at runtime. If it fails
 to start due to missing system dependencies, install the necessary OpenGL
@@ -29,3 +30,8 @@ python smcd14_emulator.py --port 5020
 ```
 
 The GUI connects to `127.0.0.1:5020` by default and displays the current position in its status bar.
+The emulator now supports registers 0-10 so the GUI can be tested without hardware.
+
+## Movement Control
+
+Enter the target coordinates in the **X**, **Y**, and **Z** fields and specify the desired **Velocity**. Click **Start Move** to begin, or press **Stop** to halt the motion.
