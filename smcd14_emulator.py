@@ -13,8 +13,16 @@ import logging
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 from pymodbus.device import ModbusDeviceIdentification
 from pymodbus.server import StartTcpServer
+import struct
+import threading
+import time
 
 # ------- Register map (word addresses) ------- #
+REG_MOVETYPE      = 0
+REG_TARGET        = 2  # 2 registers (float)
+REG_ACC           = 4  # 2 registers (float)
+REG_VELOCITY      = 8  # 2 registers (float)
+REG_CALIBVEL      = 10 # 2 registers (float)
 REG_MOTOR_ON      = 14
 REG_START_REQ     = 15
 REG_STOP_REQ      = 16
@@ -39,6 +47,15 @@ NUM_POSITIONS     = 5
 
 # Default values for those registers
 DEFAULT_REG_VALUES = {
+    REG_MOVETYPE:     0,
+    REG_TARGET:       0,
+    REG_TARGET + 1:   0,
+    REG_ACC:          0,
+    REG_ACC + 1:      0,
+    REG_VELOCITY:     0,
+    REG_VELOCITY + 1: 0,
+    REG_CALIBVEL:     0,
+    REG_CALIBVEL + 1: 0,
     REG_MOTOR_ON:      0,
     REG_START_REQ:     0,
     REG_STOP_REQ:      0,
@@ -91,10 +108,61 @@ def build_identity() -> ModbusDeviceIdentification:
     return identity
 
 
+def _regs_to_float(values) -> float:
+    """Convert two 16-bit register values to a float."""
+    hi, lo = values
+    raw = struct.pack(">HH", hi, lo)
+    return struct.unpack(">f", raw)[0]
+
+
+def _float_to_regs(value: float) -> list[int]:
+    """Convert a float to two 16-bit register values."""
+    hi, lo = struct.unpack(">HH", struct.pack(">f", value))
+    return [hi, lo]
+
+
+def _motion_task(context: ModbusServerContext, period: float = 0.1) -> None:
+    """Background task that simulates axis motion."""
+    slave = 0x00
+    prev_start = context[slave].getValues(3, REG_START_REQ, 1)[0]
+    moving = False
+    while True:
+        start = context[slave].getValues(3, REG_START_REQ, 1)[0]
+        stop = context[slave].getValues(3, REG_STOP_REQ, 1)[0]
+
+        if moving and stop:
+            moving = False
+        if start and not prev_start:
+            moving = True
+
+        if moving:
+            target = _regs_to_float(
+                context[slave].getValues(3, REG_TARGET, 2)
+            )
+            velocity = _regs_to_float(
+                context[slave].getValues(3, REG_VELOCITY, 2)
+            )
+            pos = _regs_to_float(
+                context[slave].getValues(3, REG_ACTPOS, 2)
+            )
+            step = velocity * period
+            diff = target - pos
+            if abs(diff) <= step:
+                pos = target
+                moving = False
+            else:
+                pos += step if diff > 0 else -step
+            context[slave].setValues(3, REG_ACTPOS, _float_to_regs(pos))
+
+        prev_start = start
+        time.sleep(period)
+
+
 def run_tcp(port: int) -> None:
     """Start a Modbus TCP server on the given port."""
     context = build_context()
     identity = build_identity()
+    threading.Thread(target=_motion_task, args=(context,), daemon=True).start()
     logging.info(f"Starting Modbus TCP emulator on port {port}")
     # StartTcpServer handles its own serve-loop
     StartTcpServer(
