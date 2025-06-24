@@ -17,10 +17,6 @@ packages for your platform.
 
 ## Hardware Controller
 
-When connected to a real SMCD14 controller, use the helper module
-`controllers/smcd14_controller.py` to open a Modbus TCP connection and issue
-motion commands.  See the source for available methods.
-
 ## Setup
 
 1. Install Python.

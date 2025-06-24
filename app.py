@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import struct
+import argparse
+import os
 
 from PySide6 import QtWidgets, QtUiTools, QtCore
 from pymodbus.client.tcp import ModbusTcpClient
@@ -12,6 +14,21 @@ REG_MOTOR_ON = 14
 REG_START_REQ = 15
 REG_STOP_REQ = 16
 REG_ACTPOS = 18  # two registers -> float
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--host",
+        default=os.environ.get("SMCD14_HOST", "127.0.0.1"),
+        help="IP address of the SMCD14 controller",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=int(os.environ.get("SMCD14_PORT", "5020")),
+        help="TCP port of the SMCD14 controller",
+    )
+    return parser.parse_args()
 
 def load_ui(ui_path: str) -> QtWidgets.QWidget:
     loader = QtUiTools.QUiLoader()
@@ -25,6 +42,7 @@ def load_ui(ui_path: str) -> QtWidgets.QWidget:
     return widget
 
 def main() -> int:
+    args = parse_args()
     app = QtWidgets.QApplication(sys.argv)
     window = load_ui("ui/main_window.ui")
 
@@ -39,11 +57,11 @@ def main() -> int:
         if spin is not None:
             spin.setRange(-1e6, 1e6)
 
-    client = ModbusTcpClient("127.0.0.1", port=5020)
+    client = ModbusTcpClient(args.host, port=args.port)
     if not client.connect():
         QtWidgets.QMessageBox.critical(
             None, "Connection Error",
-            "Could not connect to Modbus emulator at 127.0.0.1:5020"
+            f"Could not connect to Modbus server at {args.host}:{args.port}"
         )
         return 1
 
