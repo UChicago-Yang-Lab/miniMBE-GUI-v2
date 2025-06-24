@@ -7,9 +7,7 @@ This repository provides a minimal graphical user interface for a miniature mole
 1. Python 3.10 or later (tested with Python 3.11)
 2. PySide6 and PySide6-Tools
 3. OpenGL libraries such as `libEGL.so.1`
-4. For offline testing, start the Modbus emulator with
-   `python smcd14_emulator.py`
-5. Launch the GUI with `python app.py`
+4. Launch the GUI with `python app.py`
 
 The GUI requires OpenGL libraries such as `libEGL.so.1` at runtime. If it fails
 to start due to missing system dependencies, install the necessary OpenGL
@@ -18,7 +16,7 @@ packages for your platform.
 ## Hardware Controller
 
 The GUI communicates with up to three SMCD14 stepper controllers.  By default it
-connects to ``127.0.0.1:5020`` using slave IDs ``1``, ``2`` and ``3``.  These
+connects to ``192.168.0.100:502`` using slave IDs ``1``, ``2`` and ``3``.  These
 parameters can be overridden via the command line or the environment variables
 ``SMCD14_HOST``, ``SMCD14_PORT`` and ``SMCD14_SLAVE_IDS`` (comma separated).
 
@@ -28,17 +26,6 @@ parameters can be overridden via the command line or the environment variables
 2. Create a virtual environment.
 3. Run `pip install -r requirements.txt` (or `conda env create -f environment.yml`).
 4. Launch the GUI with `python app.py`.
-
-## Emulator
-
-The repository includes a simple Modbus TCP emulator that mimics the SMCD14 controller for offline testing.  Run it in a separate terminal:
-
-```bash
-python smcd14_emulator.py --port 5020
-```
-
-The GUI connects to `127.0.0.1:5020` by default and displays the current position in its status bar.
-The emulator now supports registers 0-10 so the GUI can be tested without hardware.
 
 ## Movement Control
 
