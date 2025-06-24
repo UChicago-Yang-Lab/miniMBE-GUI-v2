@@ -230,3 +230,59 @@ class SMCD14Controller:
         status = self._read_registers(STATUS_ADDR, 1)[0]
         return bool(status & (1 << 4))
 
+
+class XYZManipulator:
+    """Convenience wrapper around three :class:`SMCD14Controller` instances."""
+
+    def __init__(
+        self,
+        host: str,
+        port: int = 502,
+        timeout: int = 10,
+        slave_ids: Sequence[int] = (1, 2, 3),
+    ) -> None:
+        if len(slave_ids) != 3:
+            raise ValueError("Exactly three slave IDs required")
+
+        self.controllers = [
+            SMCD14Controller(host, port, timeout, slave_id=sid)
+            for sid in slave_ids
+        ]
+
+    # ------------------------------------------------------------------
+    # connection helpers
+    # ------------------------------------------------------------------
+    def connect(self) -> bool:
+        return all(ctrl.connect() for ctrl in self.controllers)
+
+    def disconnect(self) -> None:
+        for ctrl in self.controllers:
+            ctrl.disconnect()
+
+    # ------------------------------------------------------------------
+    # high level motion commands
+    # ------------------------------------------------------------------
+    def motor_on(self) -> None:
+        for ctrl in self.controllers:
+            ctrl.motor_on()
+
+    def motor_off(self) -> None:
+        for ctrl in self.controllers:
+            ctrl.motor_off()
+
+    def read_positions(self) -> tuple[float, float, float]:
+        return tuple(ctrl.read_position() for ctrl in self.controllers)
+
+    def move_absolute(self, position: Sequence[float], velocity: float) -> None:
+        if len(position) != 3:
+            raise ValueError("Expected three target coordinates")
+        start = self.read_positions()
+        vx, vy, vz = calculate_velocity_components(start, position, velocity)
+        for ctrl, target, vel in zip(self.controllers, position, (vx, vy, vz)):
+            ctrl.move_absolute(target, abs(vel))
+
+    def emergency_stop(self) -> None:
+        for ctrl in self.controllers:
+            ctrl.emergency_stop()
+
+

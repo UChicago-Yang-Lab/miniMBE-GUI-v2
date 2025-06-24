@@ -1,6 +1,6 @@
 # miniMBE GUI
 
-This repository provides a minimal graphical user interface for a miniature molecular beam epitaxy (MBE) system.  The interface is built with PySide6 and loads the `ui/main_window.ui` file at runtime.
+This repository provides a minimal graphical user interface for a miniature molecular beam epitaxy (MBE) system.  The interface is built with PySide6 and loads the `ui/main_window.ui` file at runtime.  The GUI now supports three-axis motion via the `XYZManipulator` helper which communicates with three SMCD14 controllers.
 
 ## Requirements
 
@@ -16,6 +16,11 @@ to start due to missing system dependencies, install the necessary OpenGL
 packages for your platform.
 
 ## Hardware Controller
+
+The GUI communicates with up to three SMCD14 stepper controllers.  By default it
+connects to ``127.0.0.1:5020`` using slave IDs ``1``, ``2`` and ``3``.  These
+parameters can be overridden via the command line or the environment variables
+``SMCD14_HOST``, ``SMCD14_PORT`` and ``SMCD14_SLAVE_IDS`` (comma separated).
 
 ## Setup
 
