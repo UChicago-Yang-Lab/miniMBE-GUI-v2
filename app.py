@@ -26,14 +26,14 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="miniMBE manipulator GUI")
     parser.add_argument(
         "--host",
-        default=os.environ.get("SMCD14_HOST", "127.0.0.1"),
-        help="IP address of the Modbus server",
+        default=os.environ.get("SMCD14_HOST", "192.168.0.100"),
+        help="IP address of the SMCD14 controller",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.environ.get("SMCD14_PORT", "5020")),
-        help="TCP port of the Modbus server",
+        default=int(os.environ.get("SMCD14_PORT", "502")),
+        help="Modbus TCP port",
     )
     parser.add_argument(
         "--slave-ids",
