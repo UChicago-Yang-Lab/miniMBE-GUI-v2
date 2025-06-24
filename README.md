@@ -17,12 +17,6 @@ packages for your platform.
 
 ## Hardware Controller
 
-When connected to real hardware, use the helper module
-`controllers/smcd14_controller.py` to communicate with the controller.  The GUI
-can connect to any Modbus host by passing ``--host`` and ``--port`` arguments (or
-the ``SMCD14_HOST`` and ``SMCD14_PORT`` environment variables).  By default it
-connects to ``127.0.0.1:5020``.
-
 ## Setup
 
 1. Install Python.
