@@ -14,6 +14,7 @@ import os
 import sys
 
 from PySide6 import QtCore, QtUiTools, QtWidgets
+import pyqtgraph as pg
 
 from controllers import XYZManipulator
 
@@ -81,6 +82,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stop_btn  = self.ui.findChild(QtWidgets.QPushButton,     "stopButton")
         self.home_btn  = self.ui.findChild(QtWidgets.QPushButton,     "homeButton")
 
+        # setup plotting widget for X/Y position history
+        container = self.ui.findChild(QtWidgets.QWidget, "plotContainer")
+        self.plot = pg.PlotWidget(title="Manipulator position")
+        self.plot.setLabel("left", "Y (mm)")
+        self.plot.setLabel("bottom", "X (mm)")
+        self.plot.setAspectLocked(True)
+        self.plot.showGrid(x=True, y=True, alpha=0.3)
+        self.plot.addLine(x=0, pen=pg.mkPen((150, 150, 150)))
+        self.plot.addLine(y=0, pen=pg.mkPen((150, 150, 150)))
+        layout = QtWidgets.QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.plot)
+        self.plot_line = self.plot.plot([], [], pen=pg.mkPen("y"))
+        self.current_point = self.plot.plot([], [], pen=None, symbol="o", symbolBrush="w")
+        self.data_x: list[float] = []
+        self.data_y: list[float] = []
+
         # configure ranges
         for spin in (self.spin_x, self.spin_y, self.spin_z, self.spin_v):
             spin.setRange(-1e6, 1e6)
@@ -96,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.home_btn.clicked.connect(self.start_home)
 
         # polling timer
-        self._timer = QtCore.QTimer(interval=1000, timeout=self.update_position)
+        self._timer = QtCore.QTimer(interval=200, timeout=self.update_position)
         self._timer.start()
         self.update_position()
 
@@ -124,6 +142,14 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             x, y, z = self.manipulator.read_positions()
             self._label.setText(f"Pos: {x:.3f}, {y:.3f}, {z:.3f}")
+            self.data_x.append(x)
+            self.data_y.append(y)
+            if len(self.data_x) > 1000:
+                self.data_x.pop(0)
+                self.data_y.pop(0)
+            self.plot_line.setData(self.data_x, self.data_y)
+            self.current_point.setData([x], [y])
+            self.plot.enableAutoRange(pg.ViewBox.XYAxes)
         except Exception as exc:
             self._label.setText("--")
             print("Update failed:", exc)
