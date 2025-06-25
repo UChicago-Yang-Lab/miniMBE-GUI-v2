@@ -120,11 +120,19 @@ def calculate_velocity_components(
 class SMCD14Controller:
     """Small wrapper around ``pymodbus`` for SMCD14."""
 
-    def __init__(self, host: str, port: int = 502, timeout: int = 10, slave_id: int = 1):
+    def __init__(
+        self,
+        host: str,
+        port: int = 502,
+        timeout: int = 10,
+        slave_id: int = 1,
+        backlash: float = 0.0,
+    ):
         self.host = host
         self.port = port
         self.timeout = timeout
         self.slave_id = slave_id
+        self.backlash = backlash
 
         self._client: ModbusTcpClient | None = None
         self._loop: asyncio.AbstractEventLoop | None = None
@@ -137,7 +145,13 @@ class SMCD14Controller:
             self._loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self._loop)
             self._client = ModbusTcpClient(host=self.host, port=self.port, timeout=self.timeout)
-            return self._client.connect()
+            connected = self._client.connect()
+            if connected and self.backlash is not None:
+                try:
+                    self.set_backlash(self.backlash)
+                except Exception:
+                    pass
+            return connected
 
     def disconnect(self) -> None:
         """Close the Modbus connection."""
@@ -240,12 +254,13 @@ class XYZManipulator:
         port: int = 502,
         timeout: int = 10,
         slave_ids: Sequence[int] = (1, 2, 3),
+        backlash: float = 0.0,
     ) -> None:
         if len(slave_ids) != 3:
             raise ValueError("Exactly three slave IDs required")
 
         self.controllers = [
-            SMCD14Controller(host, port, timeout, slave_id=sid)
+            SMCD14Controller(host, port, timeout, slave_id=sid, backlash=backlash)
             for sid in slave_ids
         ]
 

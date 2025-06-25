@@ -19,6 +19,8 @@ The GUI communicates with up to three SMCD14 stepper controllers.  By default it
 connects to ``192.168.0.100:502`` using slave IDs ``1``, ``2`` and ``3``.  These
 parameters can be overridden via the command line or the environment variables
 ``SMCD14_HOST``, ``SMCD14_PORT`` and ``SMCD14_SLAVE_IDS`` (comma separated).
+Backlash compensation can be specified with ``--backlash`` or the environment
+variable ``SMCD14_BACKLASH``.
 
 ## Setup
 

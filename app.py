@@ -45,6 +45,12 @@ def parse_args() -> argparse.Namespace:
         default=int(os.environ.get("SMCD14_TIMEOUT", "10")),
         help="Modbus TCP timeout in seconds",
     )
+    parser.add_argument(
+        "--backlash",
+        type=float,
+        default=float(os.environ.get("SMCD14_BACKLASH", "0")),
+        help="Backlash compensation in mm",
+    )
     return parser.parse_args()
 
 
@@ -131,6 +137,7 @@ def main() -> int:
         port      = args.port,
         timeout   = args.timeout,
         slave_ids = slave_ids,
+        backlash  = args.backlash,
     )
 
     # check connection immediately
