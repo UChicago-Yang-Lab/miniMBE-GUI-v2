@@ -32,3 +32,7 @@ parameters can be overridden via the command line or the environment variables
 Enter the target coordinates in the **X**, **Y**, and **Z** fields and specify the desired **Velocity**. Click **Start Move** to begin, or press **Stop** to halt the motion.
 
 Use the **Home** button to run the homing sequence on all axes. Homing relies on the controller's configured homing type and establishes the reference zero position required for absolute moves.
+
+### Position Plot
+
+The GUI displays a live **X/Y** plot of the manipulator's position relative to the origin. The graph supports mouse zooming and panning so you can inspect small movements. Each update adds the latest position to the trace while highlighting the current location with a marker.

@@ -5,3 +5,4 @@ dependencies:
   - python=3.13
   - pyside6
   - pymodbus
+  - pyqtgraph
