@@ -87,6 +87,40 @@
      <item>
       <widget class="QWidget" name="plotContainer"/>
      </item>
+     <item>
+      <layout class="QHBoxLayout" name="zoomLayout">
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="zoomInButton">
+         <property name="text">
+          <string>Zoom In</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="zoomOutButton">
+         <property name="text">
+          <string>Zoom Out</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
     </layout>
    </widget>
   <widget class="QMenuBar" name="menubar">

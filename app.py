@@ -91,9 +91,11 @@ def main() -> int:
             self.spin_y    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinY")
             self.spin_z    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinZ")
             self.spin_v    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinVelocity")
-            self.move_btn  = self.ui.findChild(QtWidgets.QPushButton, "moveButton")
-            self.stop_btn  = self.ui.findChild(QtWidgets.QPushButton, "stopButton")
-            self.home_btn  = self.ui.findChild(QtWidgets.QPushButton, "homeButton")
+            self.move_btn   = self.ui.findChild(QtWidgets.QPushButton, "moveButton")
+            self.stop_btn   = self.ui.findChild(QtWidgets.QPushButton, "stopButton")
+            self.home_btn   = self.ui.findChild(QtWidgets.QPushButton, "homeButton")
+            self.zoom_in_btn  = self.ui.findChild(QtWidgets.QPushButton, "zoomInButton")
+            self.zoom_out_btn = self.ui.findChild(QtWidgets.QPushButton, "zoomOutButton")
 
             # setup plotting widget for X/Y position history
             container = self.ui.findChild(QtWidgets.QWidget, "plotContainer")
@@ -111,6 +113,8 @@ def main() -> int:
             self.current_point = self.plot.plot([], [], pen=None, symbol="o", symbolBrush="w")
             self.data_x: list[float] = []
             self.data_y: list[float] = []
+            self._scale = 10.0
+            self.update_view()
 
             # configure ranges
             for spin in (self.spin_x, self.spin_y, self.spin_z, self.spin_v):
@@ -125,6 +129,10 @@ def main() -> int:
             self.stop_btn.clicked.connect(self.stop_move)
             if self.home_btn:
                 self.home_btn.clicked.connect(self.start_home)
+            if self.zoom_in_btn:
+                self.zoom_in_btn.clicked.connect(self.zoom_in)
+            if self.zoom_out_btn:
+                self.zoom_out_btn.clicked.connect(self.zoom_out)
 
             # polling timer
             self._timer = QtCore.QTimer(interval=200, timeout=self.update_position)
@@ -162,10 +170,27 @@ def main() -> int:
                     self.data_y.pop(0)
                 self.plot_line.setData(self.data_x, self.data_y)
                 self.current_point.setData([x], [y])
-                self.plot.enableAutoRange(pg.ViewBox.XYAxes)
+                r = max(abs(x), abs(y))
+                if r >= self._scale:
+                    self._scale = r * 1.2
+                self.update_view()
             except Exception as exc:
                 self._label.setText("--")
                 print("Update failed:", exc)
+
+        def update_view(self) -> None:
+            self.plot.setXRange(-self._scale, self._scale, padding=0)
+            self.plot.setYRange(-self._scale, self._scale, padding=0)
+
+        def zoom_in(self) -> None:
+            self._scale *= 0.5
+            if self._scale < 1e-3:
+                self._scale = 1e-3
+            self.update_view()
+
+        def zoom_out(self) -> None:
+            self._scale *= 2.0
+            self.update_view()
 
     # -----------------------------------------------------------------------
     # Set up manipulator & start Qt
