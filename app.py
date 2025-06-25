@@ -79,6 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.spin_v    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinVelocity")
         self.move_btn  = self.ui.findChild(QtWidgets.QPushButton,     "moveButton")
         self.stop_btn  = self.ui.findChild(QtWidgets.QPushButton,     "stopButton")
+        self.home_btn  = self.ui.findChild(QtWidgets.QPushButton,     "homeButton")
 
         # configure ranges
         for spin in (self.spin_x, self.spin_y, self.spin_z, self.spin_v):
@@ -91,6 +92,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # connect signals
         self.move_btn.clicked.connect(self.start_move)
         self.stop_btn.clicked.connect(self.stop_move)
+        if self.home_btn:
+            self.home_btn.clicked.connect(self.start_home)
 
         # polling timer
         self._timer = QtCore.QTimer(interval=1000, timeout=self.update_position)
@@ -110,6 +113,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.manipulator.emergency_stop()
         except Exception as exc:
             QtWidgets.QMessageBox.critical(self, "Stop failed", str(exc))
+
+    def start_home(self) -> None:
+        try:
+            self.manipulator.home()
+        except Exception as exc:
+            QtWidgets.QMessageBox.critical(self, "Home failed", str(exc))
 
     def update_position(self) -> None:
         try:
