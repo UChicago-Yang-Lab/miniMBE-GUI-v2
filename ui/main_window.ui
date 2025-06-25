@@ -84,6 +84,27 @@
        </item>
       </layout>
      </item>
+     <item>
+      <widget class="QWidget" name="plotContainer"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="zoomLayout">
+       <item>
+        <widget class="QPushButton" name="zoomInButton">
+         <property name="text">
+          <string>Zoom +</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="zoomOutButton">
+         <property name="text">
+          <string>Zoom -</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
     </layout>
    </widget>
   <widget class="QMenuBar" name="menubar">
