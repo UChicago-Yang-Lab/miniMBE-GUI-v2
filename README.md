@@ -30,3 +30,5 @@ parameters can be overridden via the command line or the environment variables
 ## Movement Control
 
 Enter the target coordinates in the **X**, **Y**, and **Z** fields and specify the desired **Velocity**. Click **Start Move** to begin, or press **Stop** to halt the motion.
+
+Use the **Home** button to run the homing sequence on all axes. Homing relies on the controller's configured homing type and establishes the reference zero position required for absolute moves.

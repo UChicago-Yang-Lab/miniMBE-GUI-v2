@@ -32,6 +32,8 @@ ACTUAL_POS_ADDR = 18      # two registers -> float
 ERROR_CODE_ADDR = 20
 CLEAR_REQ_ADDR = 22
 BACKLASH_ADDR = 72        # two registers -> float
+HOME_TYPE_ADDR = 70
+HOMED_FLAG_ADDR = 50
 
 # ---------------------------------------------------------------------------
 # Physical limits
@@ -199,6 +201,23 @@ class SMCD14Controller:
     def emergency_stop(self) -> None:
         self._write_register(STOP_REQ_ADDR, 1)
 
+    # -- homing -----------------------------------------------------------
+    def set_home_type(self, value: int) -> None:
+        """Configure the homing behaviour."""
+        self._write_register(HOME_TYPE_ADDR, value)
+
+    def get_home_type(self) -> int:
+        return self._read_registers(HOME_TYPE_ADDR, 1)[0]
+
+    def start_homing(self) -> None:
+        """Begin the homing procedure."""
+        self._write_register(MOVE_TYPE_ADDR, 4)
+        self._write_register(START_REQ_ADDR, 1)
+
+    def is_homed(self) -> bool:
+        status = self._read_registers(STATUS_ADDR, 1)[0]
+        return bool(status & (1 << 1))
+
     def clear_error(self) -> None:
         self._write_register(CLEAR_REQ_ADDR, 1)
         time.sleep(0.1)
@@ -284,5 +303,10 @@ class XYZManipulator:
     def emergency_stop(self) -> None:
         for ctrl in self.controllers:
             ctrl.emergency_stop()
+
+    def home(self) -> None:
+        """Start homing procedure on all axes."""
+        for ctrl in self.controllers:
+            ctrl.start_homing()
 
 
