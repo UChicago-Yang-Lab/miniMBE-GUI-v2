@@ -91,6 +91,7 @@ def main() -> int:
             self.spin_y    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinY")
             self.spin_z    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinZ")
             self.spin_v    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinVelocity")
+            self.spin_nozzle = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinNozzle")
             self.move_btn   = self.ui.findChild(QtWidgets.QPushButton, "moveButton")
             self.stop_btn   = self.ui.findChild(QtWidgets.QPushButton, "stopButton")
             self.home_btn   = self.ui.findChild(QtWidgets.QPushButton, "homeButton")
@@ -100,8 +101,8 @@ def main() -> int:
             # setup plotting widget for X/Y position history
             container = self.ui.findChild(QtWidgets.QWidget, "plotContainer")
             self.plot = pg.PlotWidget(title="Manipulator position")
-            self.plot.setLabel("left", "Y (mm)")
-            self.plot.setLabel("bottom", "X (mm)")
+            self.plot.setLabel("left", "Y (\u03bcm)")
+            self.plot.setLabel("bottom", "X (\u03bcm)")
             self.plot.setAspectLocked(True)
             self.plot.showGrid(x=True, y=True, alpha=0.3)
             self.plot.addLine(x=0, pen=pg.mkPen((150,150,150)))
@@ -110,11 +111,15 @@ def main() -> int:
             layout.setContentsMargins(0,0,0,0)
             layout.addWidget(self.plot)
             self.plot_line     = self.plot.plot([], [], pen=pg.mkPen("y"))
-            self.current_point = self.plot.plot([], [], pen=None, symbol="o", symbolBrush="w")
+            self.current_point = pg.ScatterPlotItem(pxMode=False, brush="r", pen=None)
+            self.plot.addItem(self.current_point)
             self.data_x: list[float] = []
             self.data_y: list[float] = []
-            self._scale = 10.0
+            self._scale = 50.0  # micrometers
             self.update_view()
+            view = self.plot.getViewBox()
+            view.setMouseEnabled(x=True, y=True)
+            view.sigRangeChanged.connect(self.on_range_changed)
 
             # configure ranges
             for spin in (self.spin_x, self.spin_y, self.spin_z, self.spin_v):
@@ -161,16 +166,19 @@ def main() -> int:
 
         def update_position(self) -> None:
             try:
-                x, y, z = self.manipulator.read_positions()
+                x, y, z = self.manipulator.read_positions()  # values in mm
                 self._label.setText(f"Pos: {x:.3f}, {y:.3f}, {z:.3f}")
-                self.data_x.append(x)
-                self.data_y.append(y)
+                x_um = x * 1000.0
+                y_um = y * 1000.0
+                self.data_x.append(x_um)
+                self.data_y.append(y_um)
                 if len(self.data_x) > 1000:
                     self.data_x.pop(0)
                     self.data_y.pop(0)
                 self.plot_line.setData(self.data_x, self.data_y)
-                self.current_point.setData([x], [y])
-                r = max(abs(x), abs(y))
+                size = self.spin_nozzle.value() * 2.0
+                self.current_point.setData([x_um], [y_um], size=size)
+                r = max(abs(x_um), abs(y_um))
                 if r >= self._scale:
                     self._scale = r * 1.2
                 self.update_view()
@@ -184,13 +192,19 @@ def main() -> int:
 
         def zoom_in(self) -> None:
             self._scale *= 0.5
-            if self._scale < 1e-3:
-                self._scale = 1e-3
+            if self._scale < 0.1:
+                self._scale = 0.1
             self.update_view()
 
         def zoom_out(self) -> None:
             self._scale *= 2.0
             self.update_view()
+
+        def on_range_changed(self, view: pg.ViewBox, ranges: tuple) -> None:
+            x_range, y_range = self.plot.viewRange()
+            self._scale = max(
+                abs(x_range[0]), abs(x_range[1]), abs(y_range[0]), abs(y_range[1])
+            )
 
     # -----------------------------------------------------------------------
     # Set up manipulator & start Qt
