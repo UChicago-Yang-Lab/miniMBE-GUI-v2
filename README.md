@@ -35,4 +35,4 @@ Use the **Home** button to run the homing sequence on all axes. Homing relies on
 
 ### Position Plot
 
-The GUI displays a live **X/Y** plot of the manipulator's position relative to the origin. The graph supports mouse zooming and panning so you can inspect small movements. Each update adds the latest position to the trace while highlighting the current location with a marker.
+The GUI displays a live **X/Y** plot of the manipulator's position relative to the origin. The graph now shows axes in micrometers with an initial 100×100&nbsp;µm view. Each update adds the latest position to the trace while highlighting the current location with a configurable marker whose radius corresponds to the nozzle size. Mouse zooming and panning work both via the dedicated buttons and the scroll wheel or trackpad.
