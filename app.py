@@ -58,6 +58,7 @@ def main() -> int:
     # Now we really need the GUI: import Qt & plotting libs
     from PySide6 import QtCore, QtUiTools, QtWidgets
     import pyqtgraph as pg
+    from dxf_loader import load_dxf
 
     # -----------------------------------------------------------------------
     # UI loading helper
@@ -94,6 +95,7 @@ def main() -> int:
             self.move_btn     = self.ui.findChild(QtWidgets.QPushButton,     "moveButton")
             self.home_btn     = self.ui.findChild(QtWidgets.QPushButton,     "homeButton")
             self.stop_btn     = self.ui.findChild(QtWidgets.QPushButton,     "stopButton")
+            self.load_dxf_btn = self.ui.findChild(QtWidgets.QPushButton,     "loadDxfButton")
             self.zoom_in_btn  = self.ui.findChild(QtWidgets.QPushButton,     "zoomInButton")
             self.zoom_out_btn = self.ui.findChild(QtWidgets.QPushButton,     "zoomOutButton")
 
@@ -114,6 +116,7 @@ def main() -> int:
             self.plot.addItem(self.current_point)
             self.data_x: list[float] = []
             self.data_y: list[float] = []
+            self._dxf_items: list[pg.PlotDataItem] = []
             self._scale = 50.0  # µm initial view half‐width
             self.update_view()
 
@@ -132,6 +135,8 @@ def main() -> int:
             # Connect buttons
             self.move_btn.clicked.connect(self.start_move)
             self.stop_btn.clicked.connect(self.stop_move)
+            if self.load_dxf_btn:
+                self.load_dxf_btn.clicked.connect(self.open_dxf)
             if self.home_btn:
                 self.home_btn.clicked.connect(self.start_home)
             if self.zoom_in_btn:
@@ -157,6 +162,29 @@ def main() -> int:
                 self.manipulator.emergency_stop()
             except Exception as exc:
                 QtWidgets.QMessageBox.critical(self, "Stop failed", str(exc))
+
+        def open_dxf(self) -> None:
+            path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self,
+                "Open DXF",
+                "",
+                "DXF Files (*.dxf);;All Files (*)",
+            )
+            if not path:
+                return
+            try:
+                shapes = load_dxf(path)
+            except Exception as exc:
+                QtWidgets.QMessageBox.critical(self, "DXF Error", str(exc))
+                return
+
+            for item in getattr(self, "_dxf_items", []):
+                self.plot.removeItem(item)
+            self._dxf_items = []
+            for arr in shapes:
+                item = pg.PlotDataItem(arr[:, 0], arr[:, 1], pen=pg.mkPen("c"))
+                self.plot.addItem(item)
+                self._dxf_items.append(item)
 
         def start_home(self) -> None:
             try:
