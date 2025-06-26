@@ -51,12 +51,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    # If user only asked for --help (or similar), argparse has already exited.
-    # This guard is just in case you ever parse more flags or do --version.
+    # If only asking for --help / --version, bail out before importing Qt
     if any(a in ("-h", "--help", "--version") for a in sys.argv[1:]):
         return 0
 
-    # ---- now that we're committed to showing the GUI, import Qt + plotting ----
+    # Now we really need the GUI: import Qt & plotting libs
     from PySide6 import QtCore, QtUiTools, QtWidgets
     import pyqtgraph as pg
 
@@ -75,34 +74,34 @@ def main() -> int:
         return widget
 
     # -----------------------------------------------------------------------
-    # Main window
+    # Main window definition
     # -----------------------------------------------------------------------
     class MainWindow(QtWidgets.QMainWindow):
         def __init__(self, manipulator: XYZManipulator) -> None:
             super().__init__()
             self.manipulator = manipulator
 
-            # load the .ui file
+            # Load the .ui file
             self.ui = load_ui("ui/main_window.ui")
             self.setCentralWidget(self.ui)
 
-            # find widgets by objectName
-            self.spin_x    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinX")
-            self.spin_y    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinY")
-            self.spin_z    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinZ")
-            self.spin_v    = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinVelocity")
-            self.spin_nozzle = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinNozzle")
-            self.move_btn   = self.ui.findChild(QtWidgets.QPushButton, "moveButton")
-            self.stop_btn   = self.ui.findChild(QtWidgets.QPushButton, "stopButton")
-            self.home_btn   = self.ui.findChild(QtWidgets.QPushButton, "homeButton")
-            self.zoom_in_btn  = self.ui.findChild(QtWidgets.QPushButton, "zoomInButton")
-            self.zoom_out_btn = self.ui.findChild(QtWidgets.QPushButton, "zoomOutButton")
+            # Find widgets by objectName
+            self.spin_x       = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinX")
+            self.spin_y       = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinY")
+            self.spin_z       = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinZ")
+            self.spin_v       = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinVelocity")
+            self.spin_nozzle  = self.ui.findChild(QtWidgets.QDoubleSpinBox, "spinNozzle")
+            self.move_btn     = self.ui.findChild(QtWidgets.QPushButton,     "moveButton")
+            self.home_btn     = self.ui.findChild(QtWidgets.QPushButton,     "homeButton")
+            self.stop_btn     = self.ui.findChild(QtWidgets.QPushButton,     "stopButton")
+            self.zoom_in_btn  = self.ui.findChild(QtWidgets.QPushButton,     "zoomInButton")
+            self.zoom_out_btn = self.ui.findChild(QtWidgets.QPushButton,     "zoomOutButton")
 
-            # setup plotting widget for X/Y position history
+            # Setup the X/Y plot
             container = self.ui.findChild(QtWidgets.QWidget, "plotContainer")
             self.plot = pg.PlotWidget(title="Manipulator position")
-            self.plot.setLabel("left", "Y (\u03bcm)")
-            self.plot.setLabel("bottom", "X (\u03bcm)")
+            self.plot.setLabel("left",  "Y (µm)")
+            self.plot.setLabel("bottom","X (µm)")
             self.plot.setAspectLocked(True)
             self.plot.showGrid(x=True, y=True, alpha=0.3)
             self.plot.addLine(x=0, pen=pg.mkPen((150,150,150)))
@@ -115,21 +114,22 @@ def main() -> int:
             self.plot.addItem(self.current_point)
             self.data_x: list[float] = []
             self.data_y: list[float] = []
-            self._scale = 50.0  # micrometers
+            self._scale = 50.0  # µm initial view half‐width
             self.update_view()
+
             view = self.plot.getViewBox()
             view.setMouseEnabled(x=True, y=True)
             view.sigRangeChanged.connect(self.on_range_changed)
 
-            # configure ranges
+            # Configure spinbox ranges
             for spin in (self.spin_x, self.spin_y, self.spin_z, self.spin_v):
                 spin.setRange(-1e6, 1e6)
 
-            # status label in statusBar
+            # Status bar label
             self._label = QtWidgets.QLabel("Disconnected")
             self.statusBar().addPermanentWidget(self._label)
 
-            # connect signals
+            # Connect buttons
             self.move_btn.clicked.connect(self.start_move)
             self.stop_btn.clicked.connect(self.stop_move)
             if self.home_btn:
@@ -139,7 +139,7 @@ def main() -> int:
             if self.zoom_out_btn:
                 self.zoom_out_btn.clicked.connect(self.zoom_out)
 
-            # polling timer
+            # Start polling timer
             self._timer = QtCore.QTimer(interval=200, timeout=self.update_position)
             self._timer.start()
             self.update_position()
@@ -166,7 +166,7 @@ def main() -> int:
 
         def update_position(self) -> None:
             try:
-                x, y, z = self.manipulator.read_positions()  # values in mm
+                x, y, z = self.manipulator.read_positions()  # in mm
                 self._label.setText(f"Pos: {x:.3f}, {y:.3f}, {z:.3f}")
                 x_um = x * 1000.0
                 y_um = y * 1000.0
@@ -191,9 +191,7 @@ def main() -> int:
             self.plot.setYRange(-self._scale, self._scale, padding=0)
 
         def zoom_in(self) -> None:
-            self._scale *= 0.5
-            if self._scale < 0.1:
-                self._scale = 0.1
+            self._scale = max(self._scale * 0.5, 0.1)
             self.update_view()
 
         def zoom_out(self) -> None:
@@ -203,11 +201,12 @@ def main() -> int:
         def on_range_changed(self, view: pg.ViewBox, ranges: tuple) -> None:
             x_range, y_range = self.plot.viewRange()
             self._scale = max(
-                abs(x_range[0]), abs(x_range[1]), abs(y_range[0]), abs(y_range[1])
+                abs(x_range[0]), abs(x_range[1]),
+                abs(y_range[0]), abs(y_range[1])
             )
 
     # -----------------------------------------------------------------------
-    # Set up manipulator & start Qt
+    # Instantiate manipulator and launch Qt
     # -----------------------------------------------------------------------
     slave_ids = tuple(int(s) for s in args.slave_ids.split(","))
     manip = XYZManipulator(
@@ -229,7 +228,7 @@ def main() -> int:
     app    = QtWidgets.QApplication(sys.argv)
     window = MainWindow(manip)
     window.show()
-    ret = app.exec()
+    ret    = app.exec()
     manip.disconnect()
     return ret
 
