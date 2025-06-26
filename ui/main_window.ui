@@ -105,6 +105,13 @@
         </property>
        </widget>
       </item>
+        <item>
+         <widget class="QPushButton" name="loadDxfButton">
+          <property name="text">
+           <string>Load DXF</string>
+          </property>
+         </widget>
+        </item>
      </layout>
     </item>
     <item>
