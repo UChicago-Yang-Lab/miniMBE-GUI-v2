@@ -117,9 +117,9 @@ def main() -> int:
             self._scale = 50.0  # µm initial view half‐width
             self.update_view()
 
-            view = self.plot.getViewBox()
-            view.setMouseEnabled(x=True, y=True)
-            view.sigRangeChanged.connect(self.on_range_changed)
+            self._view = self.plot.getViewBox()
+            self._view.setMouseEnabled(x=True, y=True)
+            self._view.sigRangeChanged.connect(self.on_range_changed)
 
             # Configure spinbox ranges
             for spin in (self.spin_x, self.spin_y, self.spin_z, self.spin_v):
@@ -187,8 +187,12 @@ def main() -> int:
                 print("Update failed:", exc)
 
         def update_view(self) -> None:
+            if not hasattr(self, "_ignore_range_signal"):
+                self._ignore_range_signal = False
+            self._ignore_range_signal = True
             self.plot.setXRange(-self._scale, self._scale, padding=0)
             self.plot.setYRange(-self._scale, self._scale, padding=0)
+            self._ignore_range_signal = False
 
         def zoom_in(self) -> None:
             self._scale = max(self._scale * 0.5, 0.1)
@@ -199,6 +203,8 @@ def main() -> int:
             self.update_view()
 
         def on_range_changed(self, view: pg.ViewBox, ranges: tuple) -> None:
+            if getattr(self, "_ignore_range_signal", False):
+                return
             x_range, y_range = self.plot.viewRange()
             self._scale = max(
                 abs(x_range[0]), abs(x_range[1]),
