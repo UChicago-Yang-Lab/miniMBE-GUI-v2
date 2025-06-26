@@ -189,9 +189,15 @@ def main() -> int:
         def update_view(self) -> None:
             if not hasattr(self, "_ignore_range_signal"):
                 self._ignore_range_signal = False
+
+            # Keep the current view center rather than always recentering at 0
+            x_range, y_range = self.plot.viewRange()
+            x_center = (x_range[0] + x_range[1]) * 0.5
+            y_center = (y_range[0] + y_range[1]) * 0.5
+
             self._ignore_range_signal = True
-            self.plot.setXRange(-self._scale, self._scale, padding=0)
-            self.plot.setYRange(-self._scale, self._scale, padding=0)
+            self.plot.setXRange(x_center - self._scale, x_center + self._scale, padding=0)
+            self.plot.setYRange(y_center - self._scale, y_center + self._scale, padding=0)
             self._ignore_range_signal = False
 
         def zoom_in(self) -> None:
