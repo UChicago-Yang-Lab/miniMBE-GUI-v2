@@ -177,7 +177,7 @@ def main() -> int:
                     self.data_y.pop(0)
                 self.plot_line.setData(self.data_x, self.data_y)
                 size = self.spin_nozzle.value() * 2.0
-                self.current_point.setData([x_um], [y_um], size=size)
+                self.current_point.setData(pos=[(x_um, y_um)], size=size)
                 r = max(abs(x_um), abs(y_um))
                 if r >= self._scale:
                     self._scale = r * 1.2
