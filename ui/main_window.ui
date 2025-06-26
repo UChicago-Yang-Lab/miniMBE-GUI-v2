@@ -60,7 +60,6 @@
        <item row="4" column="0">
         <widget class="QLabel" name="label_nozzle">
          <property name="text">
-          <string>Nozzle radius (µm)</string>
          </property>
         </widget>
        </item>
