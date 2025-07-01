@@ -18,6 +18,7 @@ from controllers import XYZManipulator
 # ---------------------------------------------------------------------------
 # Command line helpers
 # ---------------------------------------------------------------------------
+#Takes User Arguments to program before and returns them
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="miniMBE manipulator GUI")
     parser.add_argument(
@@ -54,6 +55,7 @@ def main() -> int:
     # If only asking for --help / --version, bail out before importing Qt
     if any(a in ("-h", "--help", "--version") for a in sys.argv[1:]):
         return 0
+    #TODO: Add some form of a version or help
 
     # Now we really need the GUI: import Qt & plotting libs
     from PySide6 import QtCore, QtUiTools, QtWidgets
