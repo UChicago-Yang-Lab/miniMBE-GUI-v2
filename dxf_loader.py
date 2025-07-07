@@ -1,3 +1,8 @@
+#TODO:
+
+
+
+
 """Lightweight DXF loading helper."""
 from __future__ import annotations
 
@@ -10,6 +15,7 @@ def load_dxf(path: str) -> list[np.ndarray]:
     """Load a DXF file and return a list of ``(N, 2)`` arrays."""
     doc = ezdxf.readfile(path)
     msp = doc.modelspace()
+    #Should msp be purged first to remove destroyed/empty entities to prevent wasting time 
     shapes: list[np.ndarray] = []
 
     for entity in msp:
@@ -22,7 +28,7 @@ def load_dxf(path: str) -> list[np.ndarray]:
             arr = np.array([[p[0], p[1]] for p in points], dtype=float)
             shapes.append(arr)
         elif kind == "ARC":
-            center = np.array(entity.dxf.center[0:2], dtype=float)
+            center = np.array([entity.dxf.center[0],entity.dxf.center[1]], dtype=float)
             radius = float(entity.dxf.radius)
             start = np.radians(float(entity.dxf.start_angle))
             end = np.radians(float(entity.dxf.end_angle))
@@ -33,7 +39,9 @@ def load_dxf(path: str) -> list[np.ndarray]:
             y = center[1] + radius * np.sin(angles)
             shapes.append(np.column_stack([x, y]))
         elif kind == "CIRCLE":
-            center = np.array(entity.dxf.center[0:2], dtype=float)
+
+            center = np.array([entity.dxf.center[0],entity.dxf.center[1]], dtype=float)
+
             radius = float(entity.dxf.radius)
             angles = np.linspace(0, 2 * np.pi, 90)
             x = center[0] + radius * np.cos(angles)
