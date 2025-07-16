@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""Simple PySide6 GUI for controlling an XYZ manipulator.
+
+The application loads `ui/main_window.ui` at runtime and relies on the
+`XYZManipulator` helper class to communicate with three SMCD14 stepper
+controllers (one per axis). Target positions for X/Y/Z and a common
+velocity can be entered in the GUI.
+"""
+
+from __future__ import annotations
+import argparse
+import os
 import sys
 
 from PySide6 import QtWidgets, QtUiTools, QtCore
@@ -58,6 +69,7 @@ def main() -> int:
     ret = app.exec()
     controller.close()
     return ret
+
 
 
 if __name__ == "__main__":
