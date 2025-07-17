@@ -11,3 +11,8 @@ manual.PDF
 __pycache__/
 *.pyc
 
+#don't check old v1 code
+Mini-MBE-GUI-v1\miniMBE-GUI
+miniMBE-GUI
+
+
