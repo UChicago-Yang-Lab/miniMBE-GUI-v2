@@ -145,7 +145,7 @@ def load_dxf(path: str) -> list[np.ndarray]:
             angles = np.linspace(0, 2 * np.pi, 90)
             x = center[0] + radius * np.cos(angles)
             y = center[1] + radius * np.sin(angles)
-            shapes.append(np.column_stack([x, y]))
+            shapes.append(x, y)
 
     return shapes
 
