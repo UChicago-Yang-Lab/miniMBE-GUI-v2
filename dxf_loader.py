@@ -114,14 +114,15 @@ def load_dxf(path: str) -> list[np.ndarray]:
             shapes.append(arr)
         elif kind =="LINE":
             #A LINE in dxf only has two properties: start and end
-            print('line appended') # debug
-            try:
-                start_point = entity.dxf.start 
-                end_point = entity.dxf.end
-                arr = np.array([[start_point[0],end_point[0]],[start_point[1],end_point[1]]])
-            except AttributeError:
+            #print('line appended') # debug
+            #try:
+            start_point = entity.dxf.start 
+            end_point = entity.dxf.end
+            print(entity.dxf.extrusion)
+            arr = np.array([[start_point[0],end_point[0]],[start_point[1],end_point[1]]])
+            '''except AttributeError:
                 points = [(v.dxf.x, v.dxf.y) for v in entity.vertices()]
-                arr = np.array([[p[0], p[1]] for p in points], dtype=float)
+                arr = np.array([[p[0], p[1]] for p in points], dtype=float)'''
             shapes.append(arr)
 
             
