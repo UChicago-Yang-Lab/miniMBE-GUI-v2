@@ -25,8 +25,12 @@ parameters can be overridden via the command line or the environment variables
 1. Install Python.
 2. Create a virtual environment.
 3. Run `pip install -r requirements.txt` (or `conda env create -f environment.yml`).
-4. Ensure Vimba SDK is installed
+4. Ensure Vimba SDK is installed. [Install Vimba SDK here.](https://www.alliedvision.com/en/products/vimba-sdk/#c1497) -- See section below on installing VimbaPython
 5. Launch the GUI with `python app.py`.
+
+### Installing VimbaPython
+VimbaPython is technically out-dated but as of now the documentation for it still remains better, making it the best option currently.
+To install VimbaPython you have to visit the alliedvision website and then install the SDK before you then install before then navigating to the location of the Vimba SDK and finding the folder of Vimba Python, before then running ```pip install .``` in that directory. 
 
 ## Movement Control
 
