@@ -25,7 +25,8 @@ parameters can be overridden via the command line or the environment variables
 1. Install Python.
 2. Create a virtual environment.
 3. Run `pip install -r requirements.txt` (or `conda env create -f environment.yml`).
-4. Launch the GUI with `python app.py`.
+4. Ensure Vimba SDK is installed
+5. Launch the GUI with `python app.py`.
 
 ## Movement Control
 
