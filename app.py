@@ -21,6 +21,7 @@ from controllers import XYZManipulator
 #Takes User Arguments to program before and returns them
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="miniMBE manipulator GUI")
+    #SMCD(Stepper Motor Control Device) Arguments below
     parser.add_argument(
         "--host",
         default=os.environ.get("SMCD14_HOST", "169.254.151.255"),
@@ -58,6 +59,7 @@ def main() -> int:
     #TODO: Add some form of a version or help
 
     # Now we really need the GUI: import Qt & plotting libs
+    from PyQt5.Widgets import QApplication
     from PySide6 import QtCore, QtUiTools, QtWidgets
     import pyqtgraph as pg
     from dxf_loader import load_dxf
