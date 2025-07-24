@@ -23,6 +23,7 @@ TEMP_FOLDER = 'temp'
 vimba = Vimba.get_instance()
 with vimba:
     def get_cams():
+            #TODO: Add Special Exception for if another camera is connected 
             cams = vimba.get_all_cameras()
             if(cams):
                 print(f"Camera Found:{cams}")
@@ -32,8 +33,7 @@ with vimba:
     def get_frame(camera):
         with camera:
             frame = camera.get_frame()
-            frame.convert_pixel_format(PixelFormat.Mono8)
-            
+            frame.convert_pixel_format(PixelFormat.Bgr8)
         return frame
 
     
@@ -52,6 +52,7 @@ with vimba:
                     camera.ExposureTime.set(e)
                     frame = get_frame(camera)
                     cv_frame = frame.as_opencv_image()
+
                     #calculate laplacian variance of image
                     gray_frame = cv2.cvtColor(cv_frame,cv2.COLOR_BGR2GRAY)
                     laplacian_var = cv2.Laplacian(gray_frame,cv2.CV2_64F).var()
