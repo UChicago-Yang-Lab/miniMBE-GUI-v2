@@ -55,12 +55,12 @@ with vimba:
 
                     #calculate laplacian variance of image
                     gray_frame = cv2.cvtColor(cv_frame,cv2.COLOR_BGR2GRAY)
-                    laplacian_var = cv2.Laplacian(gray_frame,cv2.CV2_64F).var()
+                    laplacian_var = cv2.Laplacian(gray_frame,cv2.CV_64F).var()
                     #calculate noise using skimage's estimate noise
                     sigma = estimate_sigma(gray_frame, average_sigmas=True)
 
                     #Question: Should I normalize the values in each of the image stats(Laplacian Variance & Sigma)?
-                    img_score = L_VAR_WEIGHT* laplacian_var + SIGMA_WEIGHT * sigma
+                    img_score = L_VAR_WEIGHT * laplacian_var + SIGMA_WEIGHT * sigma
 
                     #Save to dictionary
                     image_stats.append({'gain':g,'exp_time':e,'score':img_score, 'laplacian_var':laplacian_var,'sigma':sigma})
