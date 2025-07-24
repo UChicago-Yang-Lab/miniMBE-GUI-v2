@@ -2,7 +2,7 @@ name: miniMBE
 channels:
   - conda-forge
 dependencies:
-  - python=3.13
+  - python=3.11
   - pyside6
   - pymodbus
   - pyqtgraph

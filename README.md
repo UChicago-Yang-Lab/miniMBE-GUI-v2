@@ -1,6 +1,8 @@
 # miniMBE GUI
 
-This repository provides a minimal graphical user interface for a miniature molecular beam epitaxy (MBE) system.  The interface is built with PySide6 and loads the `ui/main_window.ui` file at runtime.  The GUI now supports three-axis motion via the `XYZManipulator` helper which communicates with three SMCD14 controllers.
+This repository provides a minimal graphical user interface for a miniature molecular beam epitaxy (MBE) system.  The interface is built with PySide6 and loads the `ui/main_window.ui` file at runtime.
+
+The application now includes a small controller module that communicates with an SMCD14 manipulator over Modbus TCP.  It reads the X, Y and Z axis positions (slave IDs 1, 2 and 3) and displays them in the GUI.
 
 ## Requirements
 
@@ -40,4 +42,4 @@ Use the **Home** button to run the homing sequence on all axes. Homing relies on
 
 ### Position Plot
 
-The GUI displays a live **X/Y** plot of the manipulator's position relative to the origin. The graph now shows axes in micrometers with an initial 100×100&nbsp;µm view. Each update adds the latest position to the trace while highlighting the current location with a configurable marker whose radius corresponds to the nozzle size. Mouse zooming and panning work both via the dedicated buttons and the scroll wheel or trackpad.
+The GUI connects to `127.0.0.1:5020` by default and displays the current X, Y and Z positions in a table.
