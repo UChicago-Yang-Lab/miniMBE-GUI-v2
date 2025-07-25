@@ -9,14 +9,28 @@ from skimage import img_as_float
 #TODO:
 # - Add a warning for light instability(i.e. flashing or etc.)
 
+#Minimum times searched for Gain & Exposure Time
 MIN_EXP_TIME = 1000
 MAX_EXP_TIME = 1000000
-
 MIN_GAIN = 30.0
 MAX_GAIN = 100.0
 
+#Minimum & Maximum Brightness(0-255)
+MIN_BRIGHTNESS = 20
+MAX_BRIGHTNESS = 235
 
+
+#Unused - Temp Folder Name
 TEMP_FOLDER = 'temp'
+#Check gray-scaled image for brightness(if too low or too high)
+#TODO: Refactor this method name
+#TODO: Research better methods of determining brigthness and other basic image sanity checks to run before choosing to discard the given image. 
+# also check for what the most reasonable MIN & MAX brightness values actually are
+def basic_image_check(gray_img) -> bool:
+    avg_brightness = np.average(gray_img)
+    if avg_brightness < MIN_BRIGHTNESS or avg_brightness > MAX_BRIGHTNESS:
+        return False
+    return True
 
 
 
@@ -53,8 +67,12 @@ with vimba:
                     frame = get_frame(camera)
                     cv_frame = frame.as_opencv_image()
 
-                    #calculate laplacian variance of image
                     gray_frame = cv2.cvtColor(cv_frame,cv2.COLOR_BGR2GRAY)
+                    
+                    if not basic_image_check(gray_img=gray_frame):
+                        continue
+                    
+                    #calculate laplacian variance of image
                     laplacian_var = cv2.Laplacian(gray_frame,cv2.CV_64F).var()
                     #calculate noise using skimage's estimate noise
                     sigma = estimate_sigma(gray_frame, average_sigmas=True)
@@ -79,8 +97,6 @@ with vimba:
     def main():
         cams = get_cams()
         cams[0].set_access_mode(AccessMode.Full)
-        #frame = get_frame(cams[0])
-        #cv2.imwrite('test_frame.jpg',frame.as_opencv_image())
         optimized_camera_values(cams[0])
 
 
