@@ -11,7 +11,7 @@ from skimage import img_as_float
 
 #Minimum times searched for Gain & Exposure Time
 MIN_EXP_TIME = 1000
-MAX_EXP_TIME = 1000000
+MAX_EXP_TIME = 60000 #shortened since most times anything over this is too bright
 MIN_GAIN = 30.0
 MAX_GAIN = 100.0
 
@@ -70,6 +70,7 @@ with vimba:
                     gray_frame = cv2.cvtColor(cv_frame,cv2.COLOR_BGR2GRAY)
                     
                     if not basic_image_check(gray_img=gray_frame):
+                        print(f"Image with Gain: {g}, Exposure Time: {e} is not suitable for analysis")
                         continue
                     
                     #calculate laplacian variance of image
@@ -82,7 +83,7 @@ with vimba:
 
                     #Save to dictionary
                     image_stats.append({'gain':g,'exp_time':e,'score':img_score, 'laplacian_var':laplacian_var,'sigma':sigma})
-                    print(f"Captured image with Gain: {g}, Exposure Time: {e}")
+                    print(f"Captured image with Gain: {g}, Exposure Time: {e}, Score: {img_score}, Laplacian Var: {laplacian_var}, Sigma: {sigma}")
 
         #Get the minimum score
         min_score = min('score' for img in image_stats)
